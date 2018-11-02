@@ -70,18 +70,25 @@ public class BookingServiceImpl implements BookingService {
 
     public Single<Order> execute(Order order) {
         if (order.getHolderName().length() > 0 && order.getHolderEmail().matches(EMAIL_REGEX)) {
-            return asyncMap.rxGet(DEFAULT_ASYNC_MAP_KEY).map(ar -> {
-                try {
-                    order.getSeatNums().forEach(i -> ar.getHallMap().get(order.getHallNum()).getSeatMap().get(i)
-                            .setAvailable(false)
-                            .setHolderName(order.getHolderName())
-                            .setHolderEmail(order.getHolderEmail()));
+            try {
+                return asyncMap.rxGet(DEFAULT_ASYNC_MAP_KEY).map(ar -> {
+                    order.getSeatNums().forEach(i -> {
+                        Seat seat = ar.getHallMap().get(order.getHallNum()).getSeatMap().get(i);
+                        if (seat.isAvailable()) {
+                            seat.setAvailable(false)
+                                    .setHolderName(order.getHolderName())
+                                    .setHolderEmail(order.getHolderEmail());
+                            ar.getHallMap().get(order.getHallNum()).getSeatMap().put((Integer) i, seat);
+                        } else {
+                            throw new RuntimeException("Seat " + seat.getNum() + " is not available");
+                        }
+                    });
                     LOGGER.info("Data has been updated!");
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                return ar;
-            }).flatMap(ar -> asyncMap.rxPut(DEFAULT_ASYNC_MAP_KEY, ar).andThen(Single.just(order)));
+                    return ar;
+                }).flatMap(ar -> asyncMap.rxPut(DEFAULT_ASYNC_MAP_KEY, ar).andThen(Single.just(order)));
+            } catch (Exception ex) {
+                return Single.error(ex);
+            }
         } else {
             return Single.error(new Throwable("Request details is incorrect"));
         }
