@@ -6,6 +6,7 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.core.shareddata.AsyncMap;
 import io.vertx.reactivex.core.shareddata.SharedData;
+import ru.doublegis.exception.CustomException;
 import ru.doublegis.model.Cinema;
 import ru.doublegis.model.Hall;
 import ru.doublegis.model.Order;
@@ -80,7 +81,7 @@ public class BookingServiceImpl implements BookingService {
                                     .setHolderEmail(order.getHolderEmail());
                             ar.getHallMap().get(order.getHallNum()).getSeatMap().put((Integer) i, seat);
                         } else {
-                            throw new RuntimeException("Seat " + seat.getNum() + " is not available");
+                            throw new CustomException("Seat " + seat.getNum() + " is not available");
                         }
                     });
                     LOGGER.info("Data has been updated!");
