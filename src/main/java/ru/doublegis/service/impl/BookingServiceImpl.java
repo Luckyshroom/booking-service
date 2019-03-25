@@ -1,6 +1,6 @@
 package ru.doublegis.service.impl;
 
-import io.reactivex.Single;
+import io.reactivex.Maybe;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.reactivex.core.Vertx;
@@ -65,11 +65,11 @@ public class BookingServiceImpl implements BookingService {
         });
     }
 
-    public Single<Cinema> fetch() {
+    public Maybe<Cinema> fetch() {
         return asyncMap.rxGet(DEFAULT_ASYNC_MAP_KEY);
     }
 
-    public Single<Order> execute(Order order) {
+    public Maybe<Order> execute(Order order) {
         if (order.getHolderName().length() > 0 && order.getHolderEmail().matches(EMAIL_REGEX)) {
             try {
                 return asyncMap.rxGet(DEFAULT_ASYNC_MAP_KEY).map(ar -> {
@@ -86,12 +86,12 @@ public class BookingServiceImpl implements BookingService {
                     });
                     LOGGER.info("Data has been updated!");
                     return ar;
-                }).flatMap(ar -> asyncMap.rxPut(DEFAULT_ASYNC_MAP_KEY, ar).andThen(Single.just(order)));
+                }).flatMap(ar -> asyncMap.rxPut(DEFAULT_ASYNC_MAP_KEY, ar).andThen(Maybe.just(order)));
             } catch (Exception ex) {
-                return Single.error(ex);
+                return Maybe.error(ex);
             }
         } else {
-            return Single.error(new Throwable("Request details is incorrect"));
+            return Maybe.error(new Throwable("Request details is incorrect"));
         }
     }
 }

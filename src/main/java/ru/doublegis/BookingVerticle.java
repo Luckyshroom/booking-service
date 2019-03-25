@@ -5,6 +5,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.reactivex.CompletableHelper;
+import io.vertx.reactivex.MaybeHelper;
 import io.vertx.reactivex.SingleHelper;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -44,7 +45,7 @@ public class BookingVerticle extends RestfulVerticle {
         publishHttpEndpoint(port, host, DEFAULT_SERVICE_NAME).subscribe(CompletableHelper.toObserver(future));
 
         vertx.createHttpServer()
-                .requestHandler(router::accept)
+                .requestHandler(router)
                 .rxListen(port, host)
                 .subscribe(SingleHelper.toObserver(ar -> {
                     if (ar.succeeded()) {
@@ -56,7 +57,7 @@ public class BookingVerticle extends RestfulVerticle {
     }
 
     private void getInfo(RoutingContext context) {
-        bookingService.fetch().subscribe(SingleHelper.toObserver(ar -> {
+        bookingService.fetch().subscribe(MaybeHelper.toObserver(ar -> {
             if (ar.succeeded()) {
                 context.response().setStatusCode(200)
                         .putHeader("content-type", "application/json")
@@ -69,7 +70,7 @@ public class BookingVerticle extends RestfulVerticle {
 
     private void bookSeat(RoutingContext context) {
         Order order = new Order(context.getBodyAsJson());
-        bookingService.execute(order).subscribe(SingleHelper.toObserver(ar -> {
+        bookingService.execute(order).subscribe(MaybeHelper.toObserver(ar -> {
             if (ar.succeeded()) {
                 context.response().setStatusCode(201)
                         .putHeader("content-type", "application/json")

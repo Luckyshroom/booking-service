@@ -8,7 +8,7 @@ version '1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 
 ext {
-    vertxVersion = "3.5.4"
+    vertxVersion = "3.6.3"
     junitVersion = "4.12"
 }
 

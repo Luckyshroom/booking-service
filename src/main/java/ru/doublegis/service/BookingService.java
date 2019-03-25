@@ -1,10 +1,10 @@
 package ru.doublegis.service;
 
-import io.reactivex.Single;
+import io.reactivex.Maybe;
 import ru.doublegis.model.Cinema;
 import ru.doublegis.model.Order;
 
 public interface BookingService {
-    Single<Cinema> fetch();
-    Single<Order> execute(Order order);
+    Maybe<Cinema> fetch();
+    Maybe<Order> execute(Order order);
 }
